@@ -1,0 +1,17 @@
+{
+  "name": "bssports-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.0"
+  }
+}
