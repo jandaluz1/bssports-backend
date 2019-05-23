@@ -7,7 +7,7 @@ const client = require('../redis');
 // check redis cache for gameId
 
 const redisMiddleware = (req, res, next) => {
-  client.get(req.body.id, (err, reply) => {
+  client.get(req.params.id, (err, reply) => {
     if (err) {
       console.error(err);
       throw err;
@@ -20,20 +20,20 @@ const redisMiddleware = (req, res, next) => {
   });
 };
 
-router.get('/mlb/', redisMiddleware, async (req, res, next) => {
-  let game = await Game.findOne({ gameId: req.body.id });
+router.get('/mlb/:id', redisMiddleware, async (req, res, next) => {
+  let game = await Game.findOne({ gameId: req.params.id });
 
   // check if the game stored in the database is completed
   // if it is complete return game from the database
 
-  if (game && game.stats.event_information.status === 'complete') {
+  if (game && game.stats.event_information.status === 'completed') {
     res.status(200).json(game);
   }
-  if (game && game.stats.event_information.status !== 'complete') {
+  if (game && game.stats.event_information.status !== 'completed') {
     // if game in database is not completed
     // fetch game from api, update game in database, set redis cache with update game
     const { data } = await axios.get(
-      `https://chumley.barstoolsports.com/dev/data/games/${req.body.id}.json`
+      `https://chumley.barstoolsports.com/dev/data/games/${req.params.id}.json`
     );
     game.stats = { ...data };
     game.updated = Date.now();
@@ -46,10 +46,10 @@ router.get('/mlb/', redisMiddleware, async (req, res, next) => {
   }
   if (!game) {
     const { data } = await axios.get(
-      `https://chumley.barstoolsports.com/dev/data/games/${req.body.id}.json`
+      `https://chumley.barstoolsports.com/dev/data/games/${req.params.id}.json`
     );
     game = new Game({
-      gameId: req.body.id,
+      gameId: req.params.id,
       stats: { ...data },
       updated: Date.now()
     });
@@ -59,16 +59,16 @@ router.get('/mlb/', redisMiddleware, async (req, res, next) => {
   }
 });
 
-router.get('/nba', redisMiddleware, async (req, res, next) => {
-  let game = await Game.findOne({ gameId: req.body.id });
+router.get('/nba/:id', redisMiddleware, async (req, res, next) => {
+  let game = await Game.findOne({ gameId: req.params.id });
 
-  if (game && game.stats.event_information.status === 'complete') {
+  if (game && game.stats.event_information.status === 'completed') {
     res.status(200).json(game);
   }
 
-  if (game && game.stats.event_information.status !== 'complete') {
+  if (game && game.stats.event_information.status !== 'completed') {
     const { data } = await axios.get(
-      `https://chumley.barstoolsports.com/dev/data/games/${req.body.id}.json`
+      `https://chumley.barstoolsports.com/dev/data/games/${req.params.id}.json`
     );
     game.stats = { ...data };
     game.updated = Date.now();
@@ -79,10 +79,10 @@ router.get('/nba', redisMiddleware, async (req, res, next) => {
 
   if (!game) {
     const { data } = await axios.get(
-      `https://chumley.barstoolsports.com/dev/data/games/${req.body.id}.json`
+      `https://chumley.barstoolsports.com/dev/data/games/${req.params.id}.json`
     );
     game = new Game({
-      gameId: req.body.id,
+      gameId: req.params.id,
       stats: { ...data },
       updated: Date.now()
     });
